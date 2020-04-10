@@ -1,0 +1,7 @@
+# Files
+package-lock.json
+.*.swp
+
+# Directories
+lib
+node_modules

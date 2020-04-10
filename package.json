@@ -1,0 +1,39 @@
+{
+    "name": "babel-plugin-django-gettext",
+    "description": "Babel plugin that simplifies using Django's JavaScript gettext functions",
+    "version": "1.0.0",
+    "homepage": "https://github.com/beanbaginc/babel-plugin-django-gettext",
+    "github": "https://github.com/beanbaginc/babel-plugin-django-gettext",
+    "main": "lib/index.js",
+    "keywords": [
+        "babel",
+        "es6",
+        "gettext",
+        "localization",
+        "template literals",
+        "template strings",
+        "translation"
+    ],
+    "author": {
+        "name": "",
+        "email": "christian@beanbaginc.com",
+        "url": "https://www.beanbaginc.com/"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "babel-cli": "^6.0",
+        "babel-preset-env": "^1.7.0",
+        "eslint": "^6.8.0",
+        "jasmine-node": "^3.0.0",
+        "shelljs": "~0.5"
+    },
+    "scripts": {
+        "build": "node bin/build.js",
+        "test": "node bin/test.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/beanbaginc/babel-plugin-django-gettext"
+    },
+    "dependencies": {}
+}
