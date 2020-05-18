@@ -14,8 +14,8 @@ shell.rm('-rf', installPath);
 console.log('Transforming to ES5...');
 shell.mkdir('-p', testPath);
 shell.exec(babelBin + ' --presets env --out-dir ' + installPath + ' src');
-shell.exec(babelBin + ' --presets env --plugins django-gettext --out-dir ' +
-           testPath + ' test');
+shell.exec(babelBin + ' --presets env --plugins dedent,django-gettext ' +
+           '--out-dir ' + testPath + ' test');
 
 console.log('Testing...');
 shell.exec(jasmineBin + ' --matchall ' + testPath);

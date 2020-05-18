@@ -144,7 +144,7 @@ var str = interpolate(ngettext("The button was only clicked %(count)s time!",
 ```
 
 For everything but the `ngettext`/`pngettext` variants, you can also
-expressions:
+use expressions:
 
 ```javascript
 const count = 4;
@@ -156,6 +156,36 @@ var str = interpolate(gettext("There are %(value1)s lights!"),
                       {value1: count + 1},
                       true);
 ```
+
+
+### Works With Other Tagged Templates
+
+Fan of the [dedent](https://www.npmjs.com/package/babel-plugin-dedent)
+tagged template plugin? Combine it with any of the raw gettext functions,
+like so:
+
+```javascript
+const n = 4;
+const str = gettext_raw(dedent`
+    Here we've got lots of text, which may have
+    newlines and
+        ${n} space indentation
+`);
+
+
+// That becomes:
+var n = 4;
+var str = interpolate(
+    gettext("Here we've got lots of text, which may have\nnewlines and\n    %(n)s space indentation"),
+    {n: n},
+    true);
+```
+
+Isn't that much nicer to maintain?
+
+It's not just that one, either. Most tagged templates should be compatible
+(as long as they don't need to manage their own expressions/variable references,
+because this plugin will be preparing them for interpolation first).
 
 
 # Examples

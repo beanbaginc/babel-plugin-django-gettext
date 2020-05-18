@@ -127,6 +127,20 @@ describe('Calls', function() {
                 `
             );
         });
+
+        it('Tagged template literal', function() {
+            const thing = 'test';
+
+            expect(
+                gettext_raw(dedent`
+                    This is a ${thing}.
+
+                      Indented 2 spaces.
+                `)
+            ).toEqual(
+                '##gettext##This is a test.\n\n  Indented 2 spaces.'
+            );
+        });
     });
 
     describe('gettext_noop', function() {
@@ -201,6 +215,20 @@ describe('Calls', function() {
                 hello world!
 
                 `
+            );
+        });
+
+        it('Tagged template literal', function() {
+            const thing = 'test';
+
+            expect(
+                gettext_noop_raw(dedent`
+                    This is a ${thing}.
+
+                      Indented 2 spaces.
+                `)
+            ).toEqual(
+                '##gettext_noop##This is a test.\n\n  Indented 2 spaces.'
             );
         });
     });
@@ -595,6 +623,46 @@ describe('Calls', function() {
                 );
             });
         });
+
+        describe('Tagged template literal', function() {
+            it('Singular', function() {
+                const count = 1;
+
+                expect(
+                    ngettext_raw(
+                        dedent`
+                          there is ${count} ${singular}
+                            value
+                        `,
+                        dedent`
+                          there are ${count} ${plural}
+                            values
+                        `,
+                        count)
+                ).toEqual(
+                    '##ngettext##there is 1 singular\n  value'
+                );
+            });
+
+            it('Plural', function() {
+                const count = 2;
+
+                expect(
+                    ngettext_raw(
+                        dedent`
+                          there is ${count} ${singular}
+                            value
+                        `,
+                        dedent`
+                          there are ${count} ${plural}
+                            values
+                        `,
+                        count)
+                ).toEqual(
+                    '##ngettext##there are 2 plural\n  values'
+                );
+            });
+        });
     });
 
     describe('pgettext', function() {
@@ -669,6 +737,21 @@ describe('Calls', function() {
                 hello world!
 
                 `
+            );
+        });
+
+        it('Tagged template literal', function() {
+            const thing = 'test';
+
+            expect(
+                pgettext_raw('mycontext', dedent`
+                    This is a ${thing}.
+
+                      Indented 2 spaces.
+                `)
+            ).toEqual(
+                '##pgettext##mycontext##This is a test.\n\n  Indented ' +
+                '2 spaces.'
             );
         });
     });
@@ -966,6 +1049,48 @@ describe('Calls', function() {
                         values
 
                         `
+                );
+            });
+        });
+
+        describe('Tagged template literal', function() {
+            it('Singular', function() {
+                const count = 1;
+
+                expect(
+                    npgettext_raw(
+                        'mycontext',
+                        dedent`
+                          there is ${count} ${singular}
+                            value
+                        `,
+                        dedent`
+                          there are ${count} ${plural}
+                            values
+                        `,
+                        count)
+                ).toEqual(
+                    '##npgettext##mycontext##there is 1 singular\n  value'
+                );
+            });
+
+            it('Plural', function() {
+                const count = 2;
+
+                expect(
+                    npgettext_raw(
+                        'mycontext',
+                        dedent`
+                          there is ${count} ${singular}
+                            value
+                        `,
+                        dedent`
+                          there are ${count} ${plural}
+                            values
+                        `,
+                        count)
+                ).toEqual(
+                    '##npgettext##mycontext##there are 2 plural\n  values'
                 );
             });
         });

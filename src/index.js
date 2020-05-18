@@ -35,13 +35,34 @@ module.exports = function babelPluginDjangoGettext(babel) {
      *     text (string):
      *         The text to use as the basis for the node.
      *
+     *     tagName (string, optional):
+     *         The name of a tagged template to build in place of a text node.
+     *         If provided, the result will be a
+     *         :js:class:Node<TaggedTemplateExpression>` that contains the
+     *         text.
+     *
      * Returns:
-     *     Node<StringLiteral>:
-     *     The resulting text node.
+     *     Node<StringLiteral> or Node<TaggedTemplateExpression>:
+     *     The resulting text node or tagged template.
      */
-    function buildTextNode(gettextOptions, text) {
+    function buildTextNode(gettextOptions, text, tagName) {
         if (!gettextOptions.raw) {
             text = text.replace(/\s+/g, ' ').trim();
+        }
+
+        if (tagName) {
+            return t.taggedTemplateExpression(
+                t.identifier(tagName),
+                t.templateLiteral(
+                    [
+                        t.templateElement(
+                            {
+                                cooked: text,
+                                raw: text,
+                            },
+                            true),
+                    ],
+                    []));
         }
 
         return t.stringLiteral(text);
@@ -58,11 +79,17 @@ module.exports = function babelPluginDjangoGettext(babel) {
      *               Node<TemplateElement>):
      *         The text node to transform.
      *
+     *     tagName (string, optional):
+     *         The name of a tagged template to build in place of a text node.
+     *         If provided, the result will be a
+     *         :js:class:Node<TaggedTemplateExpression>` that contains the
+     *         text.
+     *
      * Returns:
-     *     Node<StringLiteral>
-     *     The new, processed text node.
+     *     Node<StringLiteral> or Node<TaggedTemplateExpression>:
+     *     The new, processed node.
      */
-    function transformTextNode(gettextOptions, textNode) {
+    function transformTextNode(gettextOptions, textNode, tagName) {
         let text;
 
         if (t.isTemplateElement(textNode)) {
@@ -73,7 +100,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
             console.assert(false, `Unexpected text node type: ${textNode}`);
         }
 
-        return buildTextNode(gettextOptions, text);
+        return buildTextNode(gettextOptions, text, tagName);
     }
 
     /**
@@ -129,6 +156,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
              */
             let expressions;
             let quasis;
+            let tagName;
 
             if (t.isTemplateLiteral(node)) {
                 expressions = node.expressions;
@@ -136,6 +164,16 @@ module.exports = function babelPluginDjangoGettext(babel) {
             } else if (t.isTaggedTemplateExpression(node)) {
                 expressions = node.quasi.expressions;
                 quasis = node.quasi.quasis;
+
+                if (allGettextOptions[node.tag.name] === undefined) {
+                    /*
+                     * This isn't a tagged template provided by this function,
+                     * so we can safely reconstruct it as a parameter. Babel
+                     * will further traverse and transform this after we've
+                     * finished building the resulting nodes.
+                     */
+                    tagName = node.tag.name;
+                }
             } else {
                 console.assert(
                     false,
@@ -180,13 +218,15 @@ module.exports = function babelPluginDjangoGettext(babel) {
                     }
                 });
 
-                textNode = buildTextNode(gettextOptions, textParts.join(''));
+                textNode = buildTextNode(gettextOptions, textParts.join(''),
+                                         tagName);
             } else {
                 /*
                  * This ended up being pretty simple. We just have a plain
                  * string to work with.
                  */
-                textNode = transformTextNode(gettextOptions, quasis[0]);
+                textNode = transformTextNode(gettextOptions, quasis[0],
+                                             tagName);
             }
         }
 
@@ -232,6 +272,48 @@ module.exports = function babelPluginDjangoGettext(babel) {
     }
 
     /**
+     * Mark a node as transformed by this plugin.
+     *
+     * This will set an internal flag that prevents the plugin from
+     * attempting to further process it in another transformation pass.
+     *
+     * By using this flag, we can allow Babel to continue processing the
+     * children of the node (further transforming other tagged template
+     * literals, like ``dedent``) without going into a loop and transforming
+     * the same gettext calls over and over.
+     *
+     * Args:
+     *     node (Node):
+     *         The node to mark as transformed.
+     *
+     * Returns:
+     *     Node:
+     *     The provided node.
+     */
+    function markTransformed(node) {
+        node._gettextTransformed = true;
+
+        return node;
+    }
+
+    /**
+     * Return whether a node has been transformed by this plugin.
+     *
+     * See :js:func:`markTransformed` for the reasons behind marking nodes
+     * as transformed.
+     *
+     * Args:
+     *     node (Node):
+     *         The node to check.
+     *
+     * Returns:
+     *     ``true`` if the node has been transformed. ``false`` if it has not.
+     */
+    function isTransformed(node) {
+        return !!node._gettextTransformed;
+    }
+
+    /**
      * Common logic for building a call to a gettext function.
      *
      * This will determine if we can call the function directly or if it
@@ -264,12 +346,12 @@ module.exports = function babelPluginDjangoGettext(babel) {
             return buildCallExpression(
                 'interpolate',
                 [
-                    gettextCallExpression,
+                    markTransformed(gettextCallExpression),
                     t.objectExpression(varValues),
                     t.booleanLiteral(true),
                 ]);
         } else {
-            return gettextCallExpression;
+            return markTransformed(gettextCallExpression);
         }
     }
 
@@ -482,7 +564,13 @@ module.exports = function babelPluginDjangoGettext(babel) {
     function transformPath(path, name, transformFuncKey) {
         const pathNode = path.node;
 
-        if (pathNode._gettextPluginProcessed) {
+        /*
+         * Make sure this isn't a gettext() call or something that's the
+         * result of a previous transformation. We'll want to let Babel
+         * continue processing the children, but we don't want to transform
+         * anything we've already transformed.
+         */
+        if (isTransformed(pathNode)) {
             return;
         }
 
@@ -495,9 +583,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
                 const expr = transformFunc(gettextOptions, pathNode);
 
                 if (expr) {
-                    expr._gettextPluginProcessed = true;
                     path.replaceWith(expr);
-                    path.skip();
                 }
             }
         }
