@@ -38,6 +38,10 @@ function interpolate(fmt, obj, named) {
 }
 
 
+const singular = 'singular';
+const plural = 'plural';
+
+
 describe('Calls', function() {
     describe('_', function() {
         it('Ignored by plugin', function() {
@@ -202,255 +206,394 @@ describe('Calls', function() {
     });
 
     describe('N_', function() {
-        it('String literals', function() {
-            expect(
-                N_('\n\nthere is a single\nvalue \n\n',
-                   '\nthere are many\nvalues \n',
-                   1)
-            ).toEqual('##ngettext##there is a single value');
+        describe('String literals', function() {
+            it('Singular', function() {
+                expect(
+                    N_('\n\nthere is a single\nvalue \n\n',
+                       '\nthere are many\nvalues \n',
+                       1)
+                ).toEqual('##ngettext##there is a single value');
 
-            expect(
-                interpolate(N_('\n\nthere is %(count)s\nvalue \n\n',
-                               '\nthere are %(count)s\nvalues \n',
-                               2),
-                            {'count': 2},
-                            true)
-            ).toEqual('##ngettext##there are 2 values');
+                expect(
+                    interpolate(N_('\n\nthere is %(count)s\nvalue \n\n',
+                                   '\nthere are %(count)s\nvalues \n',
+                                   1),
+                                {'count': 1},
+                                true)
+                ).toEqual('##ngettext##there is 1 value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    N_('\n\nthere is a single\nvalue \n\n',
+                       '\nthere are many\nvalues \n',
+                       2)
+                ).toEqual('##ngettext##there are many values');
+
+                expect(
+                    interpolate(N_('\n\nthere is %(count)s\nvalue \n\n',
+                                   '\nthere are %(count)s\nvalues \n',
+                                   2),
+                                {'count': 2},
+                                true)
+                ).toEqual('##ngettext##there are 2 values');
+            });
         });
 
-        it('Template literal', function() {
-            expect(
-                N_(
-                    `
-
-                    there is a single
-                    value
-
-                    `,
-                    `
-
-                    there are many
-                    values
-
-                    `,
-                    1)
-            ).toEqual('##ngettext##there is a single value');
-
-            expect(
-                interpolate(
+        describe('Template literal', function() {
+            it('Singular', function() {
+                expect(
                     N_(
                         `
 
-                        there is %(count)s
+                        there is a single
                         value
 
                         `,
                         `
 
-                        there are %(count)s
+                        there are many
                         values
 
                         `,
-                        2),
-                    {'count': 2},
-                    true)
-            ).toEqual('##ngettext##there are 2 values');
+                        1)
+                ).toEqual('##ngettext##there is a single value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    interpolate(
+                        N_(
+                            `
+
+                            there is %(count)s
+                            value
+
+                            `,
+                            `
+
+                            there are %(count)s
+                            values
+
+                            `,
+                            2),
+                        {'count': 2},
+                        true)
+                ).toEqual('##ngettext##there are 2 values');
+            });
         });
 
-        it('Template literal with interpolation', function() {
-            const count = 1;
+        describe('Template literal with interpolation', function() {
+            it('Singular', function() {
+                const count = 1;
 
-            expect(
-                N_(
-                    `
+                expect(
+                    N_(
+                        `
 
-                    there is ${count}
-                    value
+                        there is ${count} ${singular}
+                        value
 
-                    `,
-                    `
+                        `,
+                        `
 
-                    there are ${count}
-                    values
+                        there are ${count} ${plural}
+                        values
 
-                    `,
-                    count)
-            ).toEqual('##ngettext##there is 1 value');
+                        `,
+                        count)
+                ).toEqual('##ngettext##there is 1 singular value');
+            });
+
+            it('Plural', function() {
+                const count = 2;
+                expect(
+                    N_(
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual('##ngettext##there are 2 plural values');
+            });
         });
     });
 
     describe('ngettext', function() {
-        it('String literals', function() {
-            expect(
-                ngettext('\n\nthere is a single\nvalue \n\n',
-                         '\nthere are many\nvalues \n',
-                         1)
-            ).toEqual('##ngettext##there is a single value');
+        describe('String literals', function() {
+            it('Singular', function() {
+                expect(
+                    ngettext('\n\nthere is a single\nvalue \n\n',
+                             '\nthere are many\nvalues \n',
+                             1)
+                ).toEqual('##ngettext##there is a single value');
 
-            expect(
-                interpolate(ngettext('\n\nthere is %(count)s\nvalue \n\n',
-                                     '\nthere are %(count)s\nvalues \n',
-                                     2),
-                            {'count': 2},
-                            true)
-            ).toEqual('##ngettext##there are 2 values');
+                expect(
+                    interpolate(ngettext('\n\nthere is %(count)s\nvalue \n\n',
+                                         '\nthere are %(count)s\nvalues \n',
+                                         1),
+                                {'count': 1},
+                                true)
+                ).toEqual('##ngettext##there is 1 value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    ngettext('\n\nthere is a single\nvalue \n\n',
+                             '\nthere are many\nvalues \n',
+                             2)
+                ).toEqual('##ngettext##there are many values');
+
+                expect(
+                    interpolate(ngettext('\n\nthere is %(count)s\nvalue \n\n',
+                                         '\nthere are %(count)s\nvalues \n',
+                                         2),
+                                {'count': 2},
+                                true)
+                ).toEqual('##ngettext##there are 2 values');
+            });
         });
 
-        it('Template literal', function() {
-            expect(
-                ngettext(
-                    `
-
-                    there is a single
-                    value
-
-                    `,
-                    `
-
-                    there are many
-                    values
-
-                    `,
-                    1)
-            ).toEqual('##ngettext##there is a single value');
-
-            expect(
-                interpolate(
+        describe('Template literal', function() {
+            it('Singular', function() {
+                expect(
                     ngettext(
                         `
 
-                        there is %(count)s
+                        there is a single
                         value
 
                         `,
                         `
 
-                        there are %(count)s
+                        there are many
                         values
 
                         `,
-                        2),
-                    {'count': 2},
-                    true)
-            ).toEqual('##ngettext##there are 2 values');
+                        1)
+                ).toEqual('##ngettext##there is a single value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    interpolate(
+                        ngettext(
+                            `
+
+                            there is %(count)s
+                            value
+
+                            `,
+                            `
+
+                            there are %(count)s
+                            values
+
+                            `,
+                            2),
+                        {'count': 2},
+                        true)
+                ).toEqual('##ngettext##there are 2 values');
+            });
         });
 
-        it('Template literal with interpolation', function() {
-            const count = 1;
+        describe('Template literal with interpolation', function() {
+            it('Singular', function() {
+                const count = 1;
 
-            expect(
-                ngettext(
-                    `
+                expect(
+                    ngettext(
+                        `
 
-                    there is ${count}
-                    value
+                        there is ${count} ${singular}
+                        value
 
-                    `,
-                    `
+                        `,
+                        `
 
-                    there are ${count}
-                    values
+                        there are ${count} ${plural}
+                        values
 
-                    `,
-                    count)
-            ).toEqual('##ngettext##there is 1 value');
+                        `,
+                        count)
+                ).toEqual('##ngettext##there is 1 singular value');
+            });
+
+            it('Plural', function() {
+                const count = 2;
+                expect(
+                    ngettext(
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual('##ngettext##there are 2 plural values');
+            });
         });
     });
 
     describe('ngettext_raw', function() {
-        it('String literals', function() {
-            expect(
-                ngettext_raw('\n\nthere is a single\nvalue \n\n',
-                             '\nthere are many\nvalues \n',
-                             1)
-            ).toEqual('##ngettext##\n\nthere is a single\nvalue \n\n');
+        describe('String literals', function() {
+            it('Singular', function() {
+                expect(
+                    ngettext_raw('\n\nthere is a single\nvalue \n\n',
+                                 '\nthere are many\nvalues \n',
+                                 1)
+                ).toEqual('##ngettext##\n\nthere is a single\nvalue \n\n');
 
-            expect(
-                interpolate(ngettext_raw('\n\nthere is %(count)s\nvalue \n\n',
-                                         '\nthere are %(count)s\nvalues \n',
-                                         2),
-                            {'count': 2},
-                            true)
-            ).toEqual('##ngettext##\nthere are 2\nvalues \n');
+                expect(
+                    interpolate(
+                        ngettext_raw('\n\nthere is %(count)s\nvalue \n\n',
+                                     '\nthere are %(count)s\nvalues \n',
+                                     1),
+                        {'count': 1},
+                        true)
+                ).toEqual('##ngettext##\n\nthere is 1\nvalue \n\n');
+            });
+
+            it('Plural', function() {
+                expect(
+                    ngettext_raw('\n\nthere is a single\nvalue \n\n',
+                                 '\nthere are many\nvalues \n',
+                                 2)
+                ).toEqual('##ngettext##\nthere are many\nvalues \n');
+
+                expect(
+                    interpolate(
+                        ngettext_raw('\n\nthere is %(count)s\nvalue \n\n',
+                                     '\nthere are %(count)s\nvalues \n',
+                                     2),
+                        {'count': 2},
+                        true)
+                ).toEqual('##ngettext##\nthere are 2\nvalues \n');
+            });
         });
 
-        it('Template literal', function() {
-            expect(
-                ngettext_raw(
-                    `
-
-                    there is a single
-                    value
-
-                    `,
-                    `
-
-                    there are many
-                    values
-
-                    `,
-                    1)
-            ).toEqual(`##ngettext##
-
-                    there is a single
-                    value
-
-                    `
-            );
-
-            expect(
-                interpolate(
+        describe('Template literal', function() {
+            it('Singular', function() {
+                expect(
                     ngettext_raw(
                         `
 
-                        there is %(count)s
+                        there is a single
                         value
 
                         `,
                         `
 
-                        there are %(count)s
+                        there are many
                         values
 
                         `,
-                        2),
-                    {'count': 2},
-                    true)
-            ).toEqual(`##ngettext##
+                        1)
+                ).toEqual(`##ngettext##
 
-                        there are 2
+                        there is a single
+                        value
+
+                        `
+                );
+            });
+
+            it('Plural', function() {
+                expect(
+                    ngettext_raw(
+                        `
+
+                        there is a single
+                        value
+
+                        `,
+                        `
+
+                        there are many
+                        values
+
+                        `,
+                        2)
+                ).toEqual(`##ngettext##
+
+                        there are many
                         values
 
                         `
-            );
+                );
+            });
         });
 
-        it('Template literal with interpolation', function() {
-            const count = 2;
+        describe('Template literal with interpolation', function() {
+            it('Singular', function() {
+                const count = 1;
 
-            expect(
-                ngettext_raw(
-                    `
+                expect(
+                    ngettext_raw(
+                        `
 
-                    there is ${count}
-                    value
+                        there is ${count} ${singular}
+                        value
 
-                    `,
-                    `
+                        `,
+                        `
 
-                    there are ${count}
-                    values
+                        there are ${count} ${plural}
+                        values
 
-                    `,
-                    count)
-            ).toEqual(
-                    `##ngettext##
+                        `,
+                        count)
+                ).toEqual(
+                        `##ngettext##
 
-                    there are 2
-                    values
+                        there is 1 singular
+                        value
 
-                    `
-            );
+                        `
+                );
+            });
+
+            it('Plural', function() {
+                const count = 2;
+
+                expect(
+                    ngettext_raw(
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual(
+                        `##ngettext##
+
+                        there are 2 plural
+                        values
+
+                        `
+                );
+            });
         });
     });
 
@@ -531,189 +674,300 @@ describe('Calls', function() {
     });
 
     describe('npgettext', function() {
-        it('String literals', function() {
-            expect(
-                npgettext('mycontext',
-                          '\n\nthere is a single\nvalue \n\n',
-                          '\nthere are many\nvalues \n',
-                          1)
-            ).toEqual('##npgettext##mycontext##there is a single value');
+        describe('String literals', function() {
+            it('Singular', function() {
+                expect(
+                    npgettext('mycontext',
+                              '\n\nthere is a single\nvalue \n\n',
+                              '\nthere are many\nvalues \n',
+                              1)
+                ).toEqual('##npgettext##mycontext##there is a single value');
 
-            expect(
-                interpolate(npgettext('mycontext',
-                                      '\n\nthere is %(count)s\nvalue \n\n',
-                                      '\nthere are %(count)s\nvalues \n',
-                                      2),
-                            {'count': 2},
-                            true)
-            ).toEqual('##npgettext##mycontext##there are 2 values');
+                expect(
+                    interpolate(npgettext('mycontext',
+                                          '\n\nthere is %(count)s\nvalue \n\n',
+                                          '\nthere are %(count)s\nvalues \n',
+                                          1),
+                                {'count': 1},
+                                true)
+                ).toEqual('##npgettext##mycontext##there is 1 value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    npgettext('mycontext',
+                              '\n\nthere is a single\nvalue \n\n',
+                              '\nthere are many\nvalues \n',
+                              2)
+                ).toEqual('##npgettext##mycontext##there are many values');
+
+                expect(
+                    interpolate(npgettext('mycontext',
+                                          '\n\nthere is %(count)s\nvalue \n\n',
+                                          '\nthere are %(count)s\nvalues \n',
+                                          2),
+                                {'count': 2},
+                                true)
+                ).toEqual('##npgettext##mycontext##there are 2 values');
+            });
         });
 
-        it('Template literal', function() {
-            expect(
-                npgettext(
-                    'mycontext',
-                    `
-
-                    there is a single
-                    value
-
-                    `,
-                    `
-
-                    there are many
-                    values
-
-                    `,
-                    1)
-            ).toEqual('##npgettext##mycontext##there is a single value');
-
-            expect(
-                interpolate(
+        describe('Template literal', function() {
+            it('Singular', function() {
+                expect(
                     npgettext(
                         'mycontext',
                         `
 
-                        there is %(count)s
+                        there is a single
                         value
 
                         `,
                         `
 
-                        there are %(count)s
+                        there are many
                         values
 
                         `,
-                        2),
-                    {'count': 2},
-                    true)
-            ).toEqual('##npgettext##mycontext##there are 2 values');
+                        1)
+                ).toEqual('##npgettext##mycontext##there is a single value');
+            });
+
+            it('Plural', function() {
+                expect(
+                    interpolate(
+                        npgettext(
+                            'mycontext',
+                            `
+
+                            there is %(count)s
+                            value
+
+                            `,
+                            `
+
+                            there are %(count)s
+                            values
+
+                            `,
+                            2),
+                        {'count': 2},
+                        true)
+                ).toEqual('##npgettext##mycontext##there are 2 values');
+            });
         });
 
-        it('Template literal with interpolation', function() {
-            const count = 1;
+        describe('Template literal with interpolation', function() {
+            it('Singular', function() {
+                const count = 1;
 
-            expect(
-                npgettext(
-                    'mycontext',
-                    `
+                expect(
+                    npgettext(
+                        'mycontext',
+                        `
 
-                    there is ${count}
-                    value
+                        there is ${count} ${singular}
+                        value
 
-                    `,
-                    `
+                        `,
+                        `
 
-                    there are ${count}
-                    values
+                        there are ${count} ${plural}
+                        values
 
-                    `,
-                    count)
-            ).toEqual('##npgettext##mycontext##there is 1 value');
+                        `,
+                        count)
+                ).toEqual('##npgettext##mycontext##there is 1 singular value');
+            });
+
+            it('Plural', function() {
+                const count = 2;
+
+                expect(
+                    npgettext(
+                        'mycontext',
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual('##npgettext##mycontext##there are 2 plural values');
+            });
         });
     });
 
     describe('npgettext_raw', function() {
-        it('String literals', function() {
-            expect(
-                npgettext_raw('mycontext',
-                              '\n\nthere is a single\nvalue \n\n',
-                              '\nthere are many\nvalues \n',
-                              1)
-            ).toEqual(
-                '##npgettext##mycontext##\n\nthere is a single\nvalue \n\n'
-            );
+        describe('String literals', function() {
+            it('Singular', function() {
+                expect(
+                    npgettext_raw('mycontext',
+                                  '\n\nthere is a single\nvalue \n\n',
+                                  '\nthere are many\nvalues \n',
+                                  1)
+                ).toEqual(
+                    '##npgettext##mycontext##\n\nthere is a single\nvalue \n\n'
+                );
 
-            expect(
-                interpolate(npgettext_raw('mycontext',
-                                          '\n\nthere is %(count)s\nvalue \n\n',
-                                          '\nthere are %(count)s\nvalues \n',
-                                          2),
-                            {'count': 2},
-                            true)
-            ).toEqual('##npgettext##mycontext##\nthere are 2\nvalues \n');
+                expect(
+                    interpolate(
+                        npgettext_raw('mycontext',
+                                      '\n\nthere is %(count)s\nvalue \n\n',
+                                      '\nthere are %(count)s\nvalues \n',
+                                      1),
+                        {'count': 1},
+                        true)
+                ).toEqual(
+                    '##npgettext##mycontext##\n\nthere is 1\nvalue \n\n'
+                );
+            });
+
+            it('Plural', function() {
+                expect(
+                    npgettext_raw('mycontext',
+                                  '\n\nthere is a single\nvalue \n\n',
+                                  '\nthere are many\nvalues \n',
+                                  2)
+                ).toEqual(
+                    '##npgettext##mycontext##\nthere are many\nvalues \n'
+                );
+
+                expect(
+                    interpolate(
+                        npgettext_raw('mycontext',
+                                      '\n\nthere is %(count)s\nvalue \n\n',
+                                      '\nthere are %(count)s\nvalues \n',
+                                      2),
+                        {'count': 2},
+                        true)
+                ).toEqual(
+                    '##npgettext##mycontext##\nthere are 2\nvalues \n'
+                );
+            });
         });
 
-        it('Template literal', function() {
-            expect(
-                npgettext_raw(
-                    'mycontext',
-                    `
-
-                    there is a single
-                    value
-
-                    `,
-                    `
-
-                    there are many
-                    values
-
-                    `,
-                    1)
-            ).toEqual(`##npgettext##mycontext##
-
-                    there is a single
-                    value
-
-                    `
-            );
-
-            expect(
-                interpolate(
+        describe('Template literal', function() {
+            it('Singular', function() {
+                expect(
                     npgettext_raw(
                         'mycontext',
                         `
 
-                        there is %(count)s
+                        there is a single
                         value
 
                         `,
                         `
 
-                        there are %(count)s
+                        there are many
                         values
 
                         `,
-                        2),
-                    {'count': 2},
-                    true)
-            ).toEqual(`##npgettext##mycontext##
+                        1)
+                ).toEqual(`##npgettext##mycontext##
 
-                        there are 2
+                        there is a single
+                        value
+
+                        `
+                );
+            });
+
+            it('Plural', function() {
+                expect(
+                    interpolate(
+                        npgettext_raw(
+                            'mycontext',
+                            `
+
+                            there is %(count)s
+                            value
+
+                            `,
+                            `
+
+                            there are %(count)s
+                            values
+
+                            `,
+                            2),
+                        {'count': 2},
+                        true)
+                ).toEqual(`##npgettext##mycontext##
+
+                            there are 2
+                            values
+
+                            `
+                );
+            });
+        });
+
+        describe('Template literal with interpolation', function() {
+            it('Singular', function() {
+                const count = 1;
+
+                expect(
+                    npgettext_raw(
+                        'mycontext',
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual(
+                        `##npgettext##mycontext##
+
+                        there is 1 singular
+                        value
+
+                        `
+                );
+            });
+
+            it('Plural', function() {
+                const count = 2;
+
+                expect(
+                    npgettext_raw(
+                        'mycontext',
+                        `
+
+                        there is ${count} ${singular}
+                        value
+
+                        `,
+                        `
+
+                        there are ${count} ${plural}
+                        values
+
+                        `,
+                        count)
+                ).toEqual(
+                        `##npgettext##mycontext##
+
+                        there are 2 plural
                         values
 
                         `
-            );
-        });
-
-        it('Template literal with interpolation', function() {
-            const count = 2;
-
-            expect(
-                npgettext_raw(
-                    'mycontext',
-                    `
-
-                    there is ${count}
-                    value
-
-                    `,
-                    `
-
-                    there are ${count}
-                    values
-
-                    `,
-                    count)
-            ).toEqual(
-                    `##npgettext##mycontext##
-
-                    there are 2
-                    values
-
-                    `
-            );
+                );
+            });
         });
     });
 });
