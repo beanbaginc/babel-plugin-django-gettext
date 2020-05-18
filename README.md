@@ -82,20 +82,25 @@ const str = gettext("   This  has  some\n    whitespace\n    going on ");
 
 Pretty obvious. Works the way you're used to today.
 
-The non-raw versions will collapse down whitespace and trim all leading and
-trailing whitespace:
+The non-raw versions will split your text into paragraphs (separated by one or
+more blank lines), collapse down whitespace and trim all leading and
+trailing whitespace in each paragraph, and trim the resulting string:
 
 ```javascript
 // So  this:
-const str = gettext('   This  has  some\n    whitespace\n    going on ');
+const str = gettext("   This  has  some\n    whitespace\n      going on.\n\nOh and here's another paragraph.\n\n    ");
 
 // Or   maybe   this:
 const str = gettext(`   This  has  some
     whitespace
-    going on `);
+      going on.
+
+    Oh and here's another paragaraph.
+
+       `);
 
 // Turns into:
-const str = gettext("This has some whitespace going on");
+const str = gettext("This has some whitespace going on.\n\nOh and here's another paragraph.");
 ```
 
 Much cleaner, and probably want you usually want in your message files.

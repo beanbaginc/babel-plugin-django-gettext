@@ -47,7 +47,13 @@ module.exports = function babelPluginDjangoGettext(babel) {
      */
     function buildTextNode(gettextOptions, text, tagName) {
         if (!gettextOptions.raw) {
-            text = text.replace(/\s+/g, ' ').trim();
+            text =
+                text.split(/\n{2,}/)
+                .map(paragraph => {
+                    return paragraph.replace(/\s+/g, ' ').trim();
+                })
+                .join('\n\n')
+                .trim();
         }
 
         if (tagName) {

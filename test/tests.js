@@ -55,18 +55,26 @@ describe('Calls', function() {
 
     describe('gettext', function() {
         it('String literal', function() {
-            expect(gettext('\n\nthis is a    test\n\n'))
-                .toEqual('##gettext##this is a test');
+            expect(
+                gettext('\n\nthis is a    test\n\nanother paragraph...\n\n')
+            ).toEqual(
+                '##gettext##this is a test\n\nanother paragraph...'
+            );
         });
 
         it('Template literal', function() {
             expect(gettext(`
 
                 this is a
-                test
+                   test
+
+                 and this is another
+                paragraph.
 
                 `)
-            ).toEqual('##gettext##this is a test');
+            ).toEqual(
+                '##gettext##this is a test\n\nand this is another paragraph.'
+            );
         });
 
         it('Template literal with interpolation', function() {
@@ -79,8 +87,10 @@ describe('Calls', function() {
                 Oh,
                 ${greeting} ${subject + "!"}
 
+                Another paragraph...
+
                 `)
-            ).toEqual('##gettext##Oh, hello world!');
+            ).toEqual('##gettext##Oh, hello world!\n\nAnother paragraph...');
         });
     });
 
