@@ -1,7 +1,10 @@
 # Files
 package-lock.json
 .*.swp
+*.tar.gz
+*.tgz
 
 # Directories
 lib
 node_modules
+tmp
