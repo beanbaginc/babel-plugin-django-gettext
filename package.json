@@ -1,7 +1,7 @@
 {
     "name": "babel-plugin-django-gettext",
     "description": "Babel plugin that simplifies using Django's JavaScript gettext functions",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "homepage": "https://github.com/beanbaginc/babel-plugin-django-gettext",
     "github": "https://github.com/beanbaginc/babel-plugin-django-gettext",
     "main": "lib/index.js",
