@@ -32,6 +32,7 @@
         "build": "node bin/build.js",
         "test": "node bin/test.js"
     },
+    "types": "lib/index.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/beanbaginc/babel-plugin-django-gettext"

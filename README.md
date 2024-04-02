@@ -14,6 +14,13 @@ $ npm install babel babel-plugin-django-gettext
 $ babel --plugins django-gettext script.js
 ```
 
+If you're using TypeScript, you will want to reference the types by including
+the following in your TypeScript files or in a `global.d.ts` file:
+
+```typescript
+/// <reference types="babel-plugin-django-gettext"/>
+```
+
 
 ## Usage
 
