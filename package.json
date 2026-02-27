@@ -1,7 +1,7 @@
 {
     "name": "babel-plugin-django-gettext",
     "description": "Babel plugin that simplifies using Django's JavaScript gettext functions",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "homepage": "https://github.com/beanbaginc/babel-plugin-django-gettext",
     "github": "https://github.com/beanbaginc/babel-plugin-django-gettext",
     "main": "lib/index.js",
@@ -19,23 +19,32 @@
         "email": "christian@beanbaginc.com",
         "url": "https://www.beanbaginc.com/"
     },
+    "files": [
+        "AUTHORS",
+        "LICENSE",
+        "README.md",
+        "lib"
+    ],
     "license": "MIT",
     "devDependencies": {
-        "babel-cli": "^6.0",
-        "babel-plugin-dedent": "^2.0.0",
-        "babel-preset-env": "^1.7.0",
-        "eslint": "^6.8.0",
-        "jasmine-node": "^3.0.0",
-        "shelljs": "~0.5"
+        "@babel/cli": "^7.28.6",
+        "@babel/preset-env": "^7.29.0",
+        "@babel/register": "^7.28.6",
+        "@eslint/js": "^10.0.1",
+        "babel-plugin-dedent": "^2.1.0",
+        "eslint": "^10.0.2",
+        "globals": "^17.3.0",
+        "jasmine": "^6.1.0"
     },
     "scripts": {
-        "build": "node bin/build.js",
-        "test": "node bin/test.js"
+        "build": "babel --out-dir lib src && cp src/index.d.ts lib",
+        "clean": "rm -rf lib",
+        "lint": "eslint",
+        "test": "npm run build && jasmine"
     },
     "types": "lib/index.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/beanbaginc/babel-plugin-django-gettext"
-    },
-    "dependencies": {}
+    }
 }
