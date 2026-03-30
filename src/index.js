@@ -1,5 +1,6 @@
 module.exports = function babelPluginDjangoGettext(babel) {
     const t = babel.types;
+    const transformedNodes = new WeakSet();
 
     /**
      * Build a CallExpression, given a function name and argument nods.
@@ -18,7 +19,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
      *     The resulting CallExpression.
      */
     function buildCallExpression(funcName, argNodes) {
-        return t.callExpression(t.Identifier(funcName), argNodes);
+        return t.callExpression(t.identifier(funcName), argNodes);
     }
 
     /**
@@ -297,7 +298,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
      *     The provided node.
      */
     function markTransformed(node) {
-        node._gettextTransformed = true;
+        transformedNodes.add(node);
 
         return node;
     }
@@ -316,7 +317,7 @@ module.exports = function babelPluginDjangoGettext(babel) {
      *     ``true`` if the node has been transformed. ``false`` if it has not.
      */
     function isTransformed(node) {
-        return !!node._gettextTransformed;
+        return transformedNodes.has(node);
     }
 
     /**
@@ -673,6 +674,8 @@ module.exports = function babelPluginDjangoGettext(babel) {
     };
 
     return {
+        name: 'babel-plugin-django-gettext',
+
         visitor: {
             CallExpression(path) {
                 transformPath(path,
